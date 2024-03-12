@@ -1,10 +1,11 @@
 const express = require('express');
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb');
 const { connectToDb, getDb } = require('./db');
 
 const PORT = 3000;
 
 const app = express();
+app.use(express.json())
 
 let db;
 
@@ -47,7 +48,7 @@ app.get('/movies/:id', (req, res) => {
 	if (ObjectId.isValid(req.params.id)) {
 		db
 			.collection('movies')
-			.findOne({ _id: ObjectId(req.params.id) })
+			.findOne({ _id: new ObjectId(req.params.id) })
 			.then((doc) => {
 				res
 					.status(200)
@@ -65,7 +66,39 @@ app.delete('/movies/:id', (req, res) => {
 	if (ObjectId.isValid(req.params.id)) {
 		db
 			.collection('movies')
-			.deleteOne({ _id: ObjectId(req.params.id) })
+			.deleteOne({ _id: new ObjectId(req.params.id) })
+			.then((result) => {
+				res
+					.status(200)
+					.json(result);
+			})
+			.catch(() => {
+				handleError(res, "Something goes wrong...")
+			})
+	} else {
+		handleError(res, "Wrong id")
+	}
+})
+
+app.post('/movies', (req, res) => {
+	db
+		.collection('movies')
+		.insertOne(req.body)
+		.then((result) => {
+			res
+				.status(201)
+				.json(result);
+		})
+		.catch(() => {
+			handleError(res, "Something goes wrong...")
+		})
+})
+
+app.patch('/movies/:id', (req, res) => {
+	if (ObjectId.isValid(req.params.id)) {
+		db
+			.collection('movies')
+			.updateOne({ _id: new ObjectId(req.params.id) }, { $set: req.body })
 			.then((result) => {
 				res
 					.status(200)
