@@ -14,5 +14,5 @@ module.exports = {
 			return cd(err)
 		})
 	},
-	getdb: () => dbConnection
+	getDb: () => dbConnection
 }
